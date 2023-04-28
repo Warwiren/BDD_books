@@ -1,0 +1,15 @@
+{
+    "name": "killi/bdd_books",
+    "autoload": {
+        "psr-4": {
+            "Killi\\BddBooks\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Killian",
+            "email": "killian.wauterspro@gmail.com"
+        }
+    ],
+    "require": {}
+}
