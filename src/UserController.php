@@ -3,7 +3,7 @@
 class UserController {
 
     public function userBiblio(){
-        return Users::showUserBiblio($_GET['user']);
+        return Users::showUserBiblio($_GET['userID']);
     }
 
 }

@@ -37,10 +37,7 @@ class Category {
     }
 
     public static function showOneCategory($category){
-        $selectCategory = "SELECT book_edition.id, title, resume, author, editions.format, book_edition.published_at FROM `book_edition` INNER Join editions ON book_edition.edition_id = editions.id INNER join books ON book_edition.book_id = books.id INNER JOIN category ON category_id = category.id  WHERE name_category = :category ";
-        $pdo = MysqlDatabaseConnectionService::get();
-        $stmlselect = $pdo->prepare($selectCategory);
-        $stmlselect->execute([':category' => $category]);
+        $selectCategory = 
 
         return $stmlselect->fetchAll();
     }

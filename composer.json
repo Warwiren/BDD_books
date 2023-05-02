@@ -11,5 +11,7 @@
             "email": "killian.wauterspro@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "mongodb/mongodb": "^1.12"
+    }
 }
