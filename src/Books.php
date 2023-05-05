@@ -5,8 +5,42 @@
 class Books {
 
     public static function showBooks(){
-        $selectAll = MongoDatabaseConnectionService::get()->selectCollection('books')->find([]);
-        return $selectAll;
+        /** @var Cursor $cursor */
+        $cursor = MongoDatabaseConnectionService::get()->selectCollection('books')->aggregate([
+            [
+                '$lookup' => [
+                    'from' => 'comments',
+                    'localField' => '_id',
+                    'foreignField' => 'book_id',
+                    'as' => 'avg_rate'
+                ]
+            ],
+            // [
+            //     '$group' => [
+            //         '_id' => null,
+            //         'averageRate' => ['$avg' => '$comments.rate'],
+            //         'books' => ['$push' => '$$ROOT']
+            //     ]
+            // ],
+            [
+                '$project' => [
+                    'books' =>[
+                        'title'=> '$$ROOT.title',
+                        'isbn' => '$$ROOT.ISBN',
+                        'author'=> '$$ROOT.author', 
+                        'category'=> '$$ROOT.category',
+                        'resume'=> '$$ROOT.summary'
+                        
+                    ],
+                    'avg' => ['$avg'=>'$avg_rate.rate']
+                ]
+            ]
+        ]);
+        $documents = $cursor->toArray();
+        if(!count($documents)) {
+            throw new Exception('book not found');
+        }
+        return $documents;
     }
 
     // public static function showAllBooks(){
@@ -26,6 +60,7 @@ class Books {
 
     public static function showOneBook($bookTitle){
         $selectOne = MongoDatabaseConnectionService::get()->selectCollection('books')->findOne(["title" => $bookTitle]);
+       
         return $selectOne;
     }
 
@@ -36,10 +71,9 @@ class Books {
             "category" => [$_POST['category']],
             "summary" => $_POST['summary'],
             "ISBN" => $_POST['isbn'],
-            "user_id" => $_POST['user_id'],
             "editions" => [
                 [
-                'id' => $_POST['editionId'],
+                'id' => new \MongoDB\BSON\ObjectId(),
                 'publisher' => $_POST['publisher'],
                 'publicationDate' => $_POST['publicationDate'],
                 'language' => $_POST['language'],
@@ -69,39 +103,59 @@ class Books {
     //     return $stmlselect->fetchAll();
     // }
 
-    // public static function allCommentBook($title){
-    //     $allCommentBook = "SELECT users.name, comment, rate, (SELECT ROUND(AVG(rate),2) from comments where book_id = books.id) as moyenne
-    //     FROM comments 
-    //     INNER JOIN books ON books.id = comments.book_id 
-    //     INNER JOIN users ON users.id = comments.user_id 
-    //     WHERE books.title = :title
-    //     ";
-    //     $pdo = MysqlDatabaseConnectionService::get();
-    //     $stmlselect = $pdo->prepare($allCommentBook);
-    //     $stmlselect->execute([':title' => $title]);
-        
-    //     $allComment =  $stmlselect->fetchAll();
+    public static function allCommentBook($id){
+        /** @var Cursor $cursor */
+        $cursor = MongoDatabaseConnectionService::get()->selectCollection('comments')->aggregate(
+            [
+            [
+                '$match' => [
+                    'book_id' => new MongoDB\BSON\ObjectID($id)
+                ]
+            ],
+            [
+                '$lookup' => [
+                    'from' => 'users',
+                    'localField' => 'user_id',
+                    'foreignField' => '_id',
+                    'as' => 'user'
+                ]
+            ],
+            [
+                '$unwind' => '$user'
+            ],
+            [
+                '$lookup' => [
+                    'from' => 'books',
+                    'localField' => 'book_id',
+                    'foreignField' => '_id',
+                    'as' => 'book'
+                ]
+            ],
+            // [
+            //     '$group' => [
+            //         '_id' => null,
+            //         'averageRate' => ['$avg' => '$rate'],
+            //     ]
+            //     ],
+            [
+                '$project'=>[
+                    'title' => '$book.title',
+                    'author' => '$book.author',
+                    'isbn' => '$book.ISBN',
+                    'comment' => '$comments',
+                    'user_name' => '$user.name',
+                    'rate' => '$rate'
+                ]
+                ]
 
+        ]);
 
-
-    //     $result = new stdClass();
-    //     $result->title = $title;
-    //     $result->moyenne = $allComment[0]['moyenne'];
-
-    //     foreach($allComment as $index => $row) { //on déplace la colonne moyenne dans une variable $row (et vu que l'on ne l'affiche jamais beh c'est bon)
-        
-    //         unset($allComment[$index]['moyenne']);
-    //         // $allComment[$index]['test'] = 'plouf_' . $index + 1;
-    //     }
-
-    //     // foreach($allComment as &$row){
-    //     //     unset($row['moyenne']);
-    //     // }
-
-
-    //     $result->Commentaires = $allComment;
-    //     return $result;
-    // }
+        $documents = $cursor->toArray();
+        if(!count($documents)) {
+            throw new Exception('book not found');
+        }
+        return $documents;
+    }
 
     public static function showAuthorBook($author){
         $collection =  MongoDatabaseConnectionService::get()->selectCollection('books');

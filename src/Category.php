@@ -1,59 +1,48 @@
 <?php 
 
 class Category {
-    private $id;
-    private $name;
 
-    public function __construct($id, $name) {
-        $this->id = $id;
-        $this->name = $name;
+    public static function updateCategories($id){
+        $updateCategory = MongoDatabaseConnectionService::get()->selectCollection('books')->updateOne(
+            [
+                '_id' => new MongoDB\BSON\ObjectID($id),
+                'category' => $_POST['tag']
+            ],
+            [
+                '$set' => ['category.$' => $_POST['newCategory']]
+            ]
+        );
+    }
+    //filter sur l'id + chercher dans category $_post $tags
+    //$set un autre post qui remplace le tag
+
+    public static function showByCategory($category){
+        $selectCategory = MongoDatabaseConnectionService::get()->selectCollection('books')->find(
+            ["category" => $category
+        ],[
+            'limit' => 3
+        ]);
+
+        return $selectCategory->toArray();
     }
 
-    // Getter / Setter pour la propriété "id"
-    public function getId() {
-        return $this->id;
+    public static function addCategory($id){
+        $addCategory = MongoDatabaseConnectionService::get()->selectCollection('books')->updateOne(
+            [
+                "_id"=> new \MongoDB\BSON\ObjectId("$id")
+            ],
+            [
+                '$addToSet' => [
+                    'category'=> $_POST['category']
+                ]
+            ]
+        );
     }
 
-    public function setId($id) {
-        $this->id = $id;
+    public static function deleteCategory($bookID, $categoryName){
+        $result = MongoDatabaseConnectionService::get()->selectCollection('books')->updateOne(
+            ['_id' => new MongoDB\BSON\ObjectID($bookID)],
+            ['$pull' => ['category' => $categoryName]]
+        );
     }
-
-    // Getter / Setter pour la propriété "name"
-    public function getname() {
-        return $this->name;
-    }
-
-    public function setname($name) {
-        $this->name = $name;
-    }
-
-    public static function showCategories(){
-        $selectCategory = "SELECT * FROM category";
-        $pdo = MysqlDatabaseConnectionService::get();
-        $stmlselect = $pdo->prepare($selectCategory);
-        $stmlselect->execute();
-        
-        return $stmlselect->fetchAll();
-    }
-
-    public static function showOneCategory($category){
-        $selectCategory = 
-
-        return $stmlselect->fetchAll();
-    }
-
-    public static function addCategory($name){
-        $addCategory = "INSERT INTO category (name_category) VALUES (?)";
-        $pdo = MysqlDatabaseConnectionService::get();
-        $stmlselect = $pdo->prepare($addCategory);
-        $stmlselect->execute([$name]);
-    }
-
-    public static function deleteCategory($id){
-        $deleteCategory = "DELETE FROM category WHERE id = (?)";
-        $pdo = MysqlDatabaseConnectionService::get();
-        $stmlselect = $pdo->prepare($deleteCategory);
-        $stmlselect->execute([$id]);
-    }
-
 }

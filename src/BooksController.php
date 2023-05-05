@@ -36,9 +36,9 @@ class BooksController {
     //     return Books::commentBook($_GET['id']);
     // }
 
-    // public function allCommentBook(){
-    //     return Books::allCommentBook($_GET['title']);
-    // }
+    public function allCommentBook(){
+        return Books::allCommentBook($_GET['id']);
+    }
 
     public function authorBook(){
         $author = isset($_GET['author']) ? $_GET['author'] : '';

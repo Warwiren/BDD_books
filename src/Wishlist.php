@@ -16,29 +16,55 @@ class Wishlist {
         $this->id = $id;
     }
 
-    public static function showUserWishlist($name){
-        $selectUserBiblio = "SELECT
-                                title,
-                                resume,
-                                editions.name,
-                                editions.format
-                            FROM
-                                Wishlist
-                            INNER JOIN book_edition ON book_edition.id = Wishlist.edition_id
-                            INNER JOIN books ON books.id = book_edition.book_id
-                            INNER JOIN users ON users.id = Wishlist.users_id
-                            INNER JOIN editions ON editions.id = book_edition.edition_id
-                            WHERE users.name  = :username";
-        $pdo = MysqlDatabaseConnectionService::get();
-        $stmlselect = $pdo->prepare($selectUserBiblio);
-        $stmlselect->execute([':username' => $name]);
-
-        $userBiblio = $stmlselect->fetchAll();
-        $result = new stdClass();
-        $result->name = $name;
-        $result->bibliotheque = $userBiblio;
-
-        return $result;
+    public static function showUserWishlist(){
+        /** @var Cursor $cursor */
+        $cursor = MongoDatabaseConnectionService::get()->selectCollection('wishlist')->aggregate([
+            [
+                '$match' => [
+                    'user_id' => new MongoDB\BSON\ObjectID($_GET['user'])
+                ]
+            ],
+            [
+                '$lookup' => [
+                    'from' => 'books',
+                    'localField' => 'wishlist',
+                    'foreignField' => '_id',
+                    'as' => 'book'
+                ]
+            ],
+            [
+                '$lookup' => [
+                    'from' => 'users',
+                    'localField' => 'user_id',
+                    'foreignField' => '_id',
+                    'as' => 'user'
+                ]
+            ],
+            [
+                '$unwind' => '$book'
+            ],
+            [
+                '$unwind' => '$user'
+            ],
+            [
+                '$project' => [
+                    'user' => [
+                        'name' => '$user.name',
+                    ],
+                    'book' => [
+                        'title' => '$book.title',
+                        'author' => '$book.author',
+                        'isbn' => '$book.ISBN'
+                    ]
+                ]
+            ]
+        ]);
+        
+        $documents = $cursor->toArray();
+        if(!count($documents)) {
+            throw new Exception('book not found');
+        }
+        return $documents;
     }
 
 }

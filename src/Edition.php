@@ -39,12 +39,11 @@ class Edition {
     }
 
     public static function showEditions(){
-        $selectEdition = "SELECT * FROM editions";
-        $pdo = MysqlDatabaseConnectionService::get();
-        $stmlselect = $pdo->prepare($selectEdition);
-        $stmlselect->execute();
+        $selectEdition = MongoDatabaseConnectionService::get()->selectCollection('books')->updateMany(
+            [],
+            ['$set'=>["editions.0.id" => new MongoDB\BSON\ObjectID()]]
+          );
         
-        return $stmlselect->fetchAll();
     }
 
     public static function showOneEdition($edition){

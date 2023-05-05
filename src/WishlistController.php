@@ -3,7 +3,7 @@
 class WishlistController {
 
     public function userWishlist(){
-        return Wishlist::showUserWishlist($_GET['user']);
+        return Wishlist::showUserWishlist();
     }
 
 }
