@@ -6,4 +6,8 @@ class WishlistController {
         return Wishlist::showUserWishlist();
     }
 
+    public function userWishlistAdd(){
+        return Wishlist::userWishlistAdd();
+    }
+
 }

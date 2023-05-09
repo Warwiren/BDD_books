@@ -29,14 +29,15 @@ $routes = [
     // '/editeur/delete' => [EditeurController::class, 'deleteEditeur'],
 
     // Lié à la catégorie
-    '/category' => [CategoryController::class, 'category'],                                                  //             -> mondo done <!>
-    '/category/update' => [CategoryController::class, 'updateCategories'],                                   //             -> mondo done <!>
-    '/category/add' => [CategoryController::class, 'addCategory'],                                           //             -> mondo done <!>
-    '/category/delete' => [CategoryController::class, 'deleteCategory'],                                     //             -> mondo done <!>
+    '/category' => [CategoryController::class, 'category'],                                                                     //             -> mondo done <!>
+    '/category/update' => [CategoryController::class, 'updateCategories'],                                                      //             -> mondo done <!>
+    '/category/add' => [CategoryController::class, 'addCategory'],                                                              //             -> mondo done <!>
+    '/category/delete' => [CategoryController::class, 'deleteCategory'],                                                        //             -> mondo done <!>
 
-    // '/biblio' => [UserController::class, 'userBiblio'], //bibliothèque d'un utilisateur
-    '/wishlist' => [WishlistController::class, 'userWishlist'], // Wishlist d'un utilisateur                 //             -> mondo done <!>
-    '/profile' => [ProfileController::class, 'userProfile'], //Affiche les stats d'un utilisateur                              -> mondo done <!>
+    '/wishlist' => [WishlistController::class, 'userWishlist'], // Wishlist d'un utilisateur                                    //             -> mondo done <!>
+    '/wishlist/add' => [WishlistController::class, 'userWishlistAdd'], // add d'un livre à la wishlist d'un utilisateur         //             -> mondo done <!>
+
+    '/profile' => [ProfileController::class, 'userProfile'], //Affiche les stats d'un utilisateur                                              -> mondo done <!>
 
 
 

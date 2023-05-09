@@ -1,20 +1,6 @@
 <?php 
 
 class Wishlist {
-    private $id;
-
-    public function __construct($id) {
-        $this->id = $id;
-    }
-
-    // Getter / Setter pour la propriété "id"
-    public function getId() {
-        return $this->id;
-    }
-
-    public function setId($id) {
-        $this->id = $id;
-    }
 
     public static function showUserWishlist(){
         /** @var Cursor $cursor */
@@ -65,6 +51,23 @@ class Wishlist {
             throw new Exception('book not found');
         }
         return $documents;
+    }
+
+    public static function userWishlistAdd(){
+        $addBook = MongoDatabaseConnectionService::get()->selectCollection('wishlist')->updateOne(
+            [
+                "user_id" => new \MongoDB\BSON\ObjectId($_POST['user'])
+            ],
+            [
+                '$addToSet' =>[
+                    'wishlist'=>
+                        new \MongoDB\BSON\ObjectId($_POST['book_id'])
+                    
+                ]
+            ]
+            
+        );
+        return $addBook;
     }
 
 }
